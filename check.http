@@ -1,0 +1,7 @@
+GET http://localhost:8080/__version__
+
+###
+GET http://localhost:8080/
+
+
+###
