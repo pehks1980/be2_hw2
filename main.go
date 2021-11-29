@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"k8s_go_app/k8s-go-app/config"
-	"k8s_go_app/k8s-go-app/server"
-	"k8s_go_app/k8s-go-app/version"
+	"k8s-go-app/config"
+	"k8s-go-app/server"
+	"k8s-go-app/version"
 	"log"
 	"os"
 	"os/signal"
@@ -31,7 +31,7 @@ func main() {
 		Commit:  version.Commit,
 		Build:   version.Build,
 	}
-
+	log.Printf("info %v", info)
 	srv := server.New(info, cfg.Port)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

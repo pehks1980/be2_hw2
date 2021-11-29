@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-go-app
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: k8s-go-app
+  template:
+    metadata:
+      labels:
+        app: k8s-go-app
+    spec:
+      containers:
+        - name: k8s-go-app
+          #IMPORTANT: provide your username here
+          image: docker.io/pehks1980/k8s-go-app:latest #pehks1980_k8s-go-app #pehks1980/k8s-go-app
+          imagePullPolicy: Never #get image from local kube 'registry'
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /__heartbeat__
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /__heartbeat__
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+
+#kubectl apply -f deployment.yml
+#kubectl get deployments
+#kubectl get pods
+#kubectl logs -f k8s-go-app-58f6d66886-xzwpc
+#kubectl port-forward k8s-go-app-7bf4ddf766-g2bl8 8080:8080

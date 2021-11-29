@@ -2,7 +2,8 @@ package server
 
 import (
 "context"
-"net/http"
+	"log"
+	"net/http"
 
 "github.com/labstack/echo/v4"
 "github.com/labstack/echo/v4/middleware"
@@ -50,7 +51,7 @@ func (s Server) Serve(ctx context.Context) error {
 
 func (s Server) initHandlers(e *echo.Echo) {
 	e.GET("/", handler)
-	e.GET("/__heartbeat_", heartbeatHandler)
+	e.GET("/__heartbeat__", heartbeatHandler)
 	e.GET("/__version__", s.versionHandler)
 	e.Any("/*", func(c echo.Context) error {
 		return c.NoContent(http.StatusNotFound)
@@ -58,6 +59,7 @@ func (s Server) initHandlers(e *echo.Echo) {
 }
 
 func handler(c echo.Context) error {
+	log.Printf("Hello %v", c.Path())
 	return c.String(http.StatusOK, "Hello, World! Welcome to GeekBrains!\n")
 }
 
