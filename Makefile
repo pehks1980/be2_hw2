@@ -5,7 +5,7 @@ GIT_COMMIT := $(shell git rev-parse HEAD) #commit head
 VERSION := latest
 APP_NAME := k8s-go-app
 BUILD := 1.0
-USERNAME := pehks1980
+USERNAME := pehks19801
 PORT := 8080
 
 
@@ -29,8 +29,13 @@ build_container:
 	docker build --build-arg=GIT_COMMIT=$(GIT_COMMIT) --build-arg=VERSION=$(VERSION)  --build-arg=PROJECT=$(PROJECT)\
   -t docker.io/$(USERNAME)/$(APP_NAME):$(VERSION) .
 
+build_container1:
+	docker build -t docker.io/$(USERNAME)/$(APP_NAME):$(VERSION) -f Dockerfile1 .
 run_container: ## Run container on port configured in `local.env`
 	docker run -i -p=$(PORT):$(PORT) --name="$(APP_NAME)" $(USERNAME)/$(APP_NAME)
+
+run_container1: ## Run container on port configured in `local.env`
+	docker run -i -p=$(PORT):$(PORT) docker.io/pehks19801/k8s-go-app:latest
 
 push_container:
 	docker push  docker.io/$(USERNAME)/$(APP_NAME):$(VERSION)
