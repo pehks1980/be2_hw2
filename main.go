@@ -3,17 +3,35 @@ package main
 import (
 	"context"
 	"fmt"
-	"k8s-go-app/config"
+	"github.com/kelseyhightower/envconfig"
 	"k8s-go-app/server"
 	"k8s-go-app/version"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
+// Config задает параметры конфигурации приложения
+type Config struct {
+	Port 		string `envconfig:"PORT" default:"8080"`
+	StaticsPath string `envconfig:"STATICS_PATH" default:"./static"`
+}
+
 func main() {
 
+	config := new(Config)
+	err := envconfig.Process("", config)
+	if err != nil {
+		log.Fatalf("Can't process config: %v", err)
+	}
+	fs := http.FileServer(http.Dir(config.StaticsPath))
+
+	//http.Handle("/", fs)
+	log.Printf("statics server started. html path: %s port: %s\n", config.StaticsPath, config.Port)
+
+	/*
 	launchMode := config.LaunchMode(os.Getenv("LAUNCH_MODE"))
 	if len(launchMode) == 0 {
 		launchMode = config.LocalEnv
@@ -25,14 +43,14 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("CONFIG: %+v", cfg)
-
+*/
 	info := server.VersionInfo{
 		Version: version.Version,
 		Commit:  version.Commit,
 		Build:   version.Build,
 	}
 	log.Printf("info %v", info)
-	srv := server.New(info, cfg.Port)
+	srv := server.New(info, config.Port, &fs)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

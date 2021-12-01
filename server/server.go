@@ -11,7 +11,7 @@ import (
 
 type Server struct {
 	VersionInfo
-
+	fs *http.Handler
 	port string
 }
 
@@ -21,9 +21,10 @@ type VersionInfo struct {
 	Build   string
 }
 
-func New(info VersionInfo, port string) *Server {
+func New(info VersionInfo, port string, fs *http.Handler) *Server {
 	return &Server{
 		VersionInfo: info,
+		fs: fs,
 		port:        port,
 	}
 }
@@ -50,7 +51,8 @@ func (s Server) Serve(ctx context.Context) error {
 }
 
 func (s Server) initHandlers(e *echo.Echo) {
-	e.GET("/", handler)
+
+	e.GET("/", echo.WrapHandler(*s.fs))
 	e.GET("/__heartbeat__", heartbeatHandler)
 	e.GET("/__version__", s.versionHandler)
 	e.Any("/*", func(c echo.Context) error {
