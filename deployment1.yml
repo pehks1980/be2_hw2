@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-go-app1
+  labels:
+    app: k8s-go-app1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: k8s-go-app1
+    spec:
+      volumes:
+      - name: src
+        emptyDir: { }
+      initContainers:
+        - name: prepare-statics
+          image: alpine/git
+          command:
+          - git
+          - clone
+          - https://github.com/mdn/beginner-html-site-scripted
+          - /static
+          volumeMounts:
+          - mountPath: /static
+            name: src
+      containers:
+        - name: k8s-go-app1
+          image: docker.io/pehks19801/k8s-go-app:latest #pehks1980_k8s-go-app #pehks1980/k8s-go-app
+          imagePullPolicy: Never #get image from local kube 'registry'
+          volumeMounts:
+            - mountPath: /static
+              name: src
+          env:
+            - name: PORT
+              value: "8080"
+            - name: STATICS_PATH
+              value: "/static"
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /__heartbeat__
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /__heartbeat__
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 2m
+              memory: 10Mi
+            requests:
+              cpu: 2m
+              memory: 10Mi
+  selector:
+    matchLabels:
+      app: k8s-go-app1
+
+# kubectl apply -f deployment.yml
